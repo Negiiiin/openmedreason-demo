@@ -52,6 +52,8 @@ header h1 small { display: block; font-weight: 500; color: var(--muted); font-si
 .chip:hover { border-color: var(--accent); color: var(--accent); }
 .chip:focus-visible, .caseBtn:focus-visible, .revealBtn:focus-visible, summary:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 .chip.picked { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
+.chip.primary { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
+.chip.primary:hover { color: var(--accent-ink); filter: brightness(1.08); }
 .chips[data-done] .chip:not(.picked) { opacity: .45; pointer-events: none; }
 .cases { display: grid; gap: 8px; }
 .caseBtn { display: grid; grid-template-columns: 56px minmax(0, 1fr); gap: 12px; align-items: center; text-align: left; background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 8px 12px 8px 8px; cursor: pointer; font: 500 16px/1.35 var(--sans); color: var(--fg); }
@@ -181,10 +183,23 @@ mark.k-problem { background: var(--pr-bg); text-decoration: underline wavy var(-
       var blk = answerBlock(c, D.ourName, D.ourSub, c.ours, true);
       if (c.ours.ann) blk.prepend(legend());
       var b = bot(blk);
-      var btn = el('<button class="revealBtn" type="button">Compare with ' + esc(D.baseName) + '</button>');
-      btn.addEventListener('click', function () { btn.remove(); compareBlock(c, g); });
-      b.append(btn);
+      b.append(nextSteps(c, g, true));
     });
+  }
+
+  // "What next?" row: optional comparison plus ways to move on. Shown after our answer (with compare) and after the comparison (without).
+  function nextSteps(c, g, withCompare) {
+    var chips = el('<div class="chips"></div>');
+    function add(label, said, primary, go) {
+      var x = el('<button class="chip' + (primary ? ' primary' : '') + '" type="button">' + label + '</button>');
+      x.addEventListener('click', function () { chips.setAttribute('data-done', '1'); x.classList.add('picked'); if (said) user(p(said)); go(); });
+      chips.append(x);
+    }
+    if (withCompare) add('Compare with ' + esc(D.baseName), 'Compare with ' + esc(D.baseName), true, function () { compareBlock(c, g); });
+    add('Another ' + esc(lc(g.label)) + ' case', 'Another ' + esc(lc(g.label)) + ' case', false, function () { askCase(g); });
+    add('Different kind of image', 'A different kind of image', false, function () { typing(400, askModality); });
+    add('Start over', null, false, function () { chat.innerHTML = ''; askModality(); });
+    return chips;
   }
 
   function verdict(m, c) {
@@ -237,14 +252,7 @@ mark.k-problem { background: var(--pr-bg); text-decoration: underline wavy var(-
       var a = el('<div class="col ours"></div>'); a.append(answerBlock(c, D.ourName, D.ourSub, c.ours, false, true));
       var q = el('<div class="col"></div>'); q.append(answerBlock(c, D.baseName, D.baseSub, c.base, true, true));
       grid.append(a, q); b.append(grid);
-      var chips = el('<div class="chips"></div>');
-      var c1 = el('<button class="chip" type="button">Another ' + esc(lc(g.label)) + ' case</button>');
-      c1.addEventListener('click', function () { chips.setAttribute('data-done', '1'); c1.classList.add('picked'); user(p('Another ' + esc(lc(g.label)) + ' case')); askCase(g); });
-      var c2 = el('<button class="chip" type="button">Different kind of image</button>');
-      c2.addEventListener('click', function () { chips.setAttribute('data-done', '1'); c2.classList.add('picked'); user(p('A different kind of image')); typing(400, askModality); });
-      var c3 = el('<button class="chip" type="button">Start over</button>');
-      c3.addEventListener('click', function () { chat.innerHTML = ''; askModality(); });
-      chips.append(c1, c2, c3); b.append(chips);
+      b.append(nextSteps(c, g, false));
     });
   }
 

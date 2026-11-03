@@ -133,8 +133,7 @@ mark.k-problem { background: var(--pr-bg); text-decoration: underline wavy var(-
   function scoreLine() {
     var s = D.score, t = D.scoreAll;
     document.getElementById('score').innerHTML =
-      '<span class="pill">These ' + s.n + ' cases: ' + esc(D.ourName) + ' <b>' + s.ours + '</b> \u00b7 ' + esc(D.baseName) + ' <b>' + s.base + '</b></span>' +
-      '<span class="pill">All ' + t.n + ' we tried: <b>' + t.ours + '</b> \u00b7 <b>' + t.base + '</b></span>';
+      '<span class="pill">These ' + s.n + ' cases: ' + esc(D.ourName) + ' <b>' + s.ours + '</b> \u00b7 ' + esc(D.baseName) + ' <b>' + s.base + '</b></span>';
   }
 
   function askModality() {
